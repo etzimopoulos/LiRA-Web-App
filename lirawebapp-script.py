@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+
 
 # # Import Libraries
 import streamlit as st
@@ -10,22 +9,71 @@ from matplotlib import pyplot as plt
 from scipy import stats
 
 
-st.title('LiRA - The Interactive Linear Regression App')
 
+#def main():
+    #"""Main function of the App"""
+#st.sidebar.title('Navigation')
+#selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+
+#page = PAGES[selection]
+
+st.title('LiRA - The Interactive Linear Regression App')
 st.image(image='lirawebapp-image.png',caption='https://pngtree.com/so/graph-icons')
-#st.write(<a href='https://pngtree.com/so/graph-icons'>graph-icons png from pngtree.com</a>)
+
+st.sidebar.title("Intro")
+st.sidebar.info("Welcome to the Interactive Linear Regression Application")
+
+st.sidebar.title("App Controls")
+
+#if __name__ == "__main__":
+ #   main()
+
+
+
+
 
 # # A. Solve using Analytical Calculus - Random data points
 
 # ## Create random X and y samples
-st.write('To start with we will simulate a Linear Function which will be used to generate our data. In order to do so please select the number of samples:')
+st.write('''
+         
+Welcome to the Interactive Linear Regression App.
+        
+Purpose of this app is to provide a simple interface to experiment with Linear Regression. Using this page you'll be able to:
 
+## Simulate a linear function 
 
-st.header('Simulate Linear function - Y = aX + b')
-np.random.seed(1)
-st.sidebar.subheader('Sampling')
+Typically, during Linear Regression, we're trying to predict a linear function of type
+ Y = aX + b from the data samples. In this case there is no dataset, so we'll use a predefined and configurable
+ linear function to generate these data. In order to do so we need to specify the following:
+ 
+#### Distribution of X
+If we're generating random data for input X, we'll need to know the Mean and Deviation of the distribution.
+ There's two controls in the sidebar to configure these parameters at the moment.
+ 
+#### Coefficients
+Slope and Intercept should be set upfront in the controls available in the sidebar.
+
+## Generate Random Data
+Once we have simulated a linear function, in order to accurately simulate a random dataset, we need to infuse these data with some 
+noise to allow for the algoright to discover the simulated linear function. In order to do so we need to specify number of Samples
+and Distribution of error or Residual:
+    
+#### Number of Samples
+To generate the data, the number of data needs to be specified as per respective control in the sidebar.
+
+#### Residual 
+Distribution of error to be added to Y to generate the Y_Samples.      
+    
+        
+
+''')
+
+st.header('Sample Generated Data')
+np.random.seed(100)
+st.sidebar.subheader('**Number of samples**')
 #st.write('Generate Random numbers')
-n = st.sidebar.slider('Select number of samples for X and Y', 50, 100)
+n = st.sidebar.slider('Select the number of samples for the population',5, 100)
 # Create r and r1, random vectors of 100 numbers each with mean = 0 and standard deviation = 1
 r = np.random.randn(n)
 r1 = np.random.randn(n)
@@ -40,15 +88,16 @@ X = mean_x * r + stddev_x
 st.sidebar.subheader('Coefficients')
 #st.write('Select a (Slope) and b (Intercept) for Simulated Linear function')
 # Select a = 0.35 and b = 2.5 for good visual
-a = st.sidebar.slider('Select "Slope" for Regression line', 0.01, 2.0,0.35)
+a = st.sidebar.slider('Select "Slope" for Regression line', 0.01, 2.0,0.15)
 b = st.sidebar.slider('Select "Intercept" for Regression line', 1.0, 5.0, 2.5)
 
 st.sidebar.subheader('Residual')
 #st.write('Select residual distribution for noise added to Simulated Linear function')
 # Create random Residual term Res using r
 # mean = 0
-stddev_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,1.0,0.2)
+stddev_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,1.0,0.7)
 res = stddev_res* r1 
+
 
 
 #st.sidebar.[n, mean_x, stddev_x, stddev_res]()
@@ -60,13 +109,14 @@ y = yreg + res
 
 # Storing Population Regression Line "RegL", data points X and y in a data frame
 rl = pd.DataFrame(
-    {'X': X,
+    {"X": X,
      'y': y,
      'RegL':yreg}
 )
 
-st.write('Show the first five rows of our dataframe')
-st.dataframe(rl.head().style.highlight_max(axis=0))
+st.write('The table below shows a sample of the generated population.')
+st.write('"X" and y" are the simulated linear function while RegL is the generated output to use for the model.')
+st.dataframe(rl.head())
 
 
 
@@ -188,6 +238,16 @@ plt.show()
 st.pyplot()
 
 
+st.sidebar.title("About")
+st.sidebar.info(
+    """
+    This app is built and maintained by Evangelos Tzimopoulos. 
+    
+    You can contact me at 
+    [LinkedIn](https://www.linkedin.com/in/etzimopoulos/) or view my 
+    [GitHub page](https://github.com/etzimopoulos).
+    """
+)
 
 
 
