@@ -20,4 +20,4 @@ WORKDIR /app
 
 # Run streamlit
 ENTRYPOINT ["streamlit", "run"]
-CMD ["lirawebapp-script.py"]
+CMD ["lirawebapp-refactored.py"]

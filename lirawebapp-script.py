@@ -95,8 +95,8 @@ st.sidebar.subheader('Residual')
 #st.write('Select residual distribution for noise added to Simulated Linear function')
 # Create random Residual term Res using r
 # mean = 0
-stddev_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,1.0,0.7)
-res = stddev_res* r1 
+mean_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,1.0,0.7)
+res = mean_res* r1 
 
 
 
@@ -234,7 +234,7 @@ plt.title('Actual vs Predicted')
 plt.xlabel('X')
 plt.ylabel('y')
 plt.legend()
-plt.show()
+#plt.show()
 st.pyplot()
 
 
