@@ -10,15 +10,15 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import stats
 
-import pages.homepage
-import pages.about
+#import pages.homepage
+#import pages.about
 
 #ast.core.services.other.set_logging_format()
 
-PAGES = {
-    "Home": pages.homepage,
-    "About": pages.about,
-}
+#PAGES = {
+#    "Home": pages.homepage,
+#    "About": pages.about,
+#}
 
 
 
