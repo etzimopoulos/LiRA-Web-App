@@ -144,14 +144,16 @@ def OLS_evaluation(rl, ypred, alpha, beta, n):
     )
     mcf_df
     
-    
+   
+   
+   
     # Model Assessment Dataframe - Storing all key indicators in dummy dataframe with range 1
     ma_df = pd.DataFrame(
         {'Ref': range(0,1),
-         'Residual Sum of Squares (RSS)': RSS,
-         'RSE (Standard Deviation σ)': RSE,
-         'Total Sum of Squares (TSS)': TSS,
-         'R2 Statistic': R2
+         'RSS': RSS,
+         'RSE (σ)': RSE,
+         'TSS': TSS,
+         'R2': R2
          }
     )
     ma_df.iloc[:,1:9]
@@ -177,35 +179,37 @@ def main():
     # Introduction Page
     # **************************************************************************************************************************
     st.title('LiRA - The Interactive Linear Regression App')
-    st.image(image='lirawebapp-image.png',caption='https://pngtree.com/so/graph-icons')
+    st.image(image='lirawebapp-image.png',caption='Source: https://pngtree.com/so/graph-icons')
     st.write('''
              
     Welcome to the Interactive Linear Regression App.
             
     Purpose of this app is to provide a simple interface to experiment with Linear Regression. Using this page you'll be able to:
     
-    ## Simulate a linear function 
+    ####
+    ## 1. Simulate a linear function 
     
     Typically, during Linear Regression, we're trying to predict a linear function of type
-     Y = aX + b from the data samples. In this case there is no dataset, so we'll use a predefined and configurable
-     linear function to generate these data. In order to do so we need to specify the following:
+     Y = aX + b from the data samples. In this case there is no dataset, so we'll create a predefined and configurable
+     linear function to generate these data from. In order to do so we need to specify the following:
      
-    #### Distribution of X
-    If we're generating random data for input X, we'll need to know the Mean and Deviation of the distribution.
-     There's two controls in the sidebar to configure these parameters at the moment.
+    #### Distribution of X (Input)
+    In order to generate random data samples for input X, we'll need to know the Mean and Deviation of the distribution,
+    which can be set by adjusting the respective controls in the sidebar widget.
      
-    #### Coefficients
-    Slope and Intercept should be set upfront in the controls available in the sidebar.
+    #### Coefficients (a, b)
+    The Slope and Intercept of the linear function can also be adjusted using the controls available in the sidebar widget.
     
-    ## Generate Random Data
-    Once we have simulated a linear function, in order to accurately simulate a random dataset, we need to infuse these data with some 
-    noise to allow for the algoright to discover the simulated linear function. In order to do so we need to specify number of Samples
-    and Distribution of error or Residual:
+    ####
+    ## 2. Generate Random Data population
+    Once we have simulated a linear function, we need to infuse these data with some noise, to allow for the algoright to discover
+    the simulated linear function. In order to do so we need to specify number of Samples "n" and the Mean of the error Distribution
+    or Mean of Error (Residual):
         
-    #### Number of Samples
+    #### Number of Samples - n
     To generate the data, the number of data needs to be specified as per respective control in the sidebar.
     
-    #### Residual 
+    #### Residual - e
     Distribution of error to be added to Y to generate the Y_Samples.      
     ''')
     
@@ -214,24 +218,24 @@ def main():
     # User Input - Sidebar widgets
     # ****************************************************************************************************
     st.sidebar.title("Intro")
-    st.sidebar.info("Welcome to the Interactive Linear Regression Application")
+    st.sidebar.info("Welcome to LiRA - the Interactive Linear Regression Application")
     st.sidebar.title("App Controls")
     st.sidebar.subheader('**Number of samples**')
     n = st.sidebar.slider('Select the number of samples for the population',5, 100)
     
     st.sidebar.subheader('Configure distribution for X')
     # Use these for good visual - (mean_x = 3, stddev_x = 2)
-    mean_x = st.sidebar.slider("Select Mean for generating X",-5,5,3)
-    stddev_x = st.sidebar.slider('Selct Standard Deviation for generating X',-5,5,2)
+    mean_x = st.sidebar.slider("Select Mean for generating X",-10,10,3)
+    stddev_x = st.sidebar.slider('Select Standard Deviation for generating X',-5,5,2)
     
     st.sidebar.subheader('Coefficients')
     # Select a = 0.35 and b = 2.5 for good visual
-    a = st.sidebar.slider('Select "Slope" for Regression line', 0.01, 2.0,0.15)
-    b = st.sidebar.slider('Select "Intercept" for Regression line', 1.0, 5.0, 2.5)
+    a = st.sidebar.slider('Select "Slope" for Regression line', -2.0, 2.0,0.15)
+    b = st.sidebar.slider('Select "Intercept" for Regression line', -10.0, 10.0, 2.5)
     
     st.sidebar.subheader('Residual')
     #st.write('Select residual distribution for noise added to Simulated Linear function')
-    mean_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,1.0,0.7)
+    mean_res = st.sidebar.slider ('Select Standard Deviation for residual error',0.0,2.0,0.7)
     
     st.sidebar.title("About")
     st.sidebar.info(
@@ -261,11 +265,12 @@ def main():
     # Create Dependent Variable simulated Output vector y by specifying Slope, Intercept, Input vector X and Simulated Residual Error
     y, y_act = create_variable(a, b, X, err)
     
-    
-    st.header('Sample Generated Data')
-    st.write('The table below shows a sample of the generated population.')
-    st.write('"X" and y" are the simulated linear function while RegL is the generated output to use for the model.')
-    
+    st.write('''
+    ##
+    ## 3. View a sample of generated Data
+       The table below, shows a sample of the generated population "X" and "y" along with "Y_act", the actual output of the simulated 
+       linear function used to generate the observed "y".
+             ''')
     # Storing Population Actual Regression Line "y_act", data points X and y in a data frame
     rl = pd.DataFrame(
         {"X": X,
@@ -277,18 +282,27 @@ def main():
 
 
     st.write('''
-    ## Linear Regression Method
-    In order to predict the linear regression line there are 4 options available:
+    ##
+    ## 4. Select Linear Regression Method
+    In order to implement the linear regression model, there are 4 options available which are summarised below along with links
+    for more in depth reading:
     
     * [Ordinary Least Squares - Simple Linear Regression](https://en.wikipedia.org/wiki/Simple_linear_regression)
     * [Ordinary Least Squares - Normal Equations](https://en.wikipedia.org/wiki/Ordinary_least_squares)
-    * Gradient Descent
-    * SKlearn
+    * [Gradient Descent](https://www.geeksforgeeks.org/gradient-descent-in-linear-regression/) or [LSM Algorithm](http://cs229.stanford.edu/notes/cs229-notes1.pdf)
+    * [SKlearn - Linear Models](https://scikit-learn.org/stable/modules/linear_model.html)
 
+    #### Select Linear Regression method
              ''')
+       
     #method1=["Ordinary Least Squares", "Normal Equations", "Gradient Descent", "SKlearn"]
     method=["Ordinary Least Squares"]
-    lira_method = st.selectbox('Select Linear Regression Method', (method))
+    lira_method = st.selectbox('',(method))
+    
+    
+    
+    
+    
     if lira_method == "Ordinary Least Squares":
         # Calculate coefficients
         alpha, beta = OLS_method(rl)
@@ -300,20 +314,49 @@ def main():
     
     
     
-    
-    st.header('Model Evaluation Metrics')
+    st.write('''
+    ####
+    ## 5. Evaluate Model Metrics
+    At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+        ''')
+              
     # Evaluate Model
-    model_coeff, model_assess = OLS_evaluation(rl, ypred, alpha, beta, n)
-    st.subheader('Assessment of Coefficients')
+    model_coeff, model_assess = OLS_evaluation(rl, ypred, alpha, beta, n);
+    st.write('''
+    #### Assessment of Coefficients
+    * Residual Square Error - RSE
+    * t-Statistic
+    * p-Value
+    ''')
+
     model_coeff
-    st.subheader('Model Assessment Summary')
+    st.write('''
+  
+    #### Model Assessment Summary
+    * Residual Sum of Squares - RSS
+    * RSE (Standard Deviation σ) - RSE
+    * Total Sum of Squares - TSS 
+    * R2 Statistic
+            ''') 
     # Cut out the dummy index column to see the Results
     model_assess.iloc[:,1:9]    
     
+    st.write('''
+    #### 
+     More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+            
+    ''')
     
     
-    st.header('Plots')
-    st.write('Plot Predicted vs Actual vs Sampled Data')
+    st.write('''
+    ##
+    ## 6. Plot results
+             ''')
+              
+    st.write('''
+             Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
+             generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
+             ''')
     
     # Plot regression against actual data
     plt.figure(figsize=(12, 6))
