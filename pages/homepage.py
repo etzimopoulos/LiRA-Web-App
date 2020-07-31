@@ -13,7 +13,7 @@ def write():
     with st.spinner("Loading Homepage ..."):
         #ast.shared.components.title_awesome(" - Homepage")
         #st.title("LiRA Web App - HomePage")
-        
+        st.image(image='lirawebapp-image.png',caption='Source: https://pngtree.com/so/graph-icons')
         st.write('''
                  
         Welcome to the Interactive Linear Regression App.
@@ -41,13 +41,13 @@ def write():
         or Mean of Error (Residual):
             
         #### Number of Samples - n
-        To generate the data, the number of data needs to be specified as per respective control in the sidebar.
+        To generate the data, the number of data points need to be specified as per respective control in the sidebar.
         
         #### Residual - e
         Distribution of error to be added to Y to generate the Y_Samples.      
         ''')
         
-         # ****************************************************************************************************
+        # ****************************************************************************************************
         # Input widgets
         # ****************************************************************************************************
         
@@ -71,23 +71,9 @@ def write():
            
         
         
-        # ***************************************************************************************************************************
-        # Generate Data
-        # ***************************************************************************************************************************
-        # Create r and r1, random vectors of "n" numbers each with mean = 0 and standard deviation = 1
-        np.random.seed(100)
-        r = np.random.randn(n)
-        r1 = np.random.randn(n)
         
-        # Create Independent Variable as simulated Input vector X by specifying Mean, Standard Deviation and number of samples 
-        X = sf.create_distribution(mean_x, stddev_x,r)
-        
-        # Create Random Error as simulated Residual Error term err using mean = 0 and Standard Deviation from Slider
-        err = sf.create_distribution(mean_res,0, r1)
-        
-        
-        # Create Dependent Variable simulated Output vector y by specifying Slope, Intercept, Input vector X and Simulated Residual Error
-        y, y_act = sf.create_variable(a, b, X, err)
+        # Dataframe to store generated data
+        rl, X1, y1 = sf.generate_data(n, a, b, mean_x, stddev_x, mean_res)
         
         st.write('''
         ##
@@ -95,12 +81,7 @@ def write():
            The table below, shows a sample of the generated population "X" and "y" along with "Y_act", the actual output of the simulated 
            linear function used to generate the observed "y".
                  ''')
-        # Storing Population Actual Regression Line "y_act", data points X and y in a data frame
-        rl = pd.DataFrame(
-            {"X": X,
-             'y': y,
-             'y_act': y_act}
-        )
+    
         st.dataframe(rl.head())
         # ****************************************************************************************************************************
     
@@ -119,21 +100,35 @@ def write():
         #### Select Linear Regression method
                  ''')
            
-        #method1=["Ordinary Least Squares", "Normal Equations", "Gradient Descent", "SKlearn"]
-        method=["Ordinary Least Squares"]
+        method=["OLS-Simple Linear Regression", "OLS-Normal Equations", "Gradient Descent", "SKlearn"]
+        #method=["OLS-Simple Linear Regression", "OLS-Normal Equations"]
         lira_method = st.selectbox('',(method))
         
         
         
         
         
-        if lira_method == "Ordinary Least Squares":
+        if lira_method == "OLS-Simple Linear Regression":
             # Calculate coefficients
             alpha, beta = sf.OLS_method(rl)
             # Calculate Regression Line
-            ypred = sf.liraweb_predict(alpha, beta, X, "OLS")
+            ypred = sf.liraweb_predict(alpha, beta, rl['X'], "OLS")
+            # Evaluate Model
+            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+        elif lira_method == "OLS-Normal Equations":
+            # Calculate coefficients
+            a, b = sf.NE_method(X1,y1)
+            # Calculate Regression Line
+            ypred = sf.liraweb_predict(a, b, rl['X'], "NE")
+            #y1pred = b + a* X1
+            # Evaluate Model
+            # create new evaluation method sf.NE_evaluation and replace - for now use ypred
+            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, a, b, n);
         else:
-            print("Select OLS for now")
+            st.write('''
+                     #### Notice
+                     This method is under development at the moment. Please use "Simple Linear Regression" for now.
+                     ''')
     
         
         
@@ -144,8 +139,7 @@ def write():
         At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
             ''')
                   
-        # Evaluate Model
-        model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+        
         st.write('''
         #### Assessment of Coefficients
         * Residual Square Error - RSE
@@ -153,9 +147,11 @@ def write():
         * p-Value
         ''')
     
-        model_coeff
+        st.write(model_coeff)
+        
+        
         st.write('''
-      
+        ####
         #### Model Assessment Summary
         * Residual Sum of Squares - RSS
         * RSE (Standard Deviation σ) - RSE
@@ -163,7 +159,7 @@ def write():
         * R2 Statistic
                 ''') 
         # Cut out the dummy index column to see the Results
-        model_assess.iloc[:,1:9]    
+        st.write(model_assess.iloc[:,1:9])
         
         st.write('''
         #### 
@@ -181,21 +177,14 @@ def write():
                  Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
                  generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
                  ''')
+
+        # Plot results
+        if lira_method == "OLS-Simple Linear Regression":
+            sf.plot_model(rl,ypred, "OLS")
+        elif lira_method == "OLS-Normal Equations":
+            sf.plot_model(rl,ypred, "NE")
         
-        # Plot regression against actual data
-        plt.figure(figsize=(12, 6))
-        # Population Regression Line
-        plt.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
-        # Least squares line
-        plt.plot(X, ypred, label = 'Predicted (Least Squares Line)', color='blue')     
-        # scatter plot showing actual data
-        plt.plot(X, y, 'ro', label ='Collected data')   
-        plt.title('Actual vs Predicted')
-        plt.xlabel('X')
-        plt.ylabel('y')
-        plt.legend()
-        plt.show()
-        st.pyplot()
+        
 
 if __name__ == "__main__":
     write()

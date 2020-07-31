@@ -21,7 +21,7 @@ PAGES = {
 def main():
     """Main function of the App"""
     st.title('The Interactive Linear Regression App')
-    st.image(image='lirawebapp-image.png',caption='Source: https://pngtree.com/so/graph-icons')
+    #st.image(image='lirawebapp-image.png',caption='Source: https://pngtree.com/so/graph-icons')
     
     
     st.sidebar.title("Intro")

@@ -1,4 +1,5 @@
 streamlit
+awesome-streamlit
 pandas
 numpy
 seaborn

@@ -4,7 +4,8 @@ import streamlit as st
 
 # pylint: disable=line-too-long
 def write():
-   st.markdown(
+    st.image(image='lirawebapp-image.png',caption='Source: https://pngtree.com/so/graph-icons')
+    st.markdown(
             '''
         ## Resources
         Links to more reading about the 4 methods implemented for Linear Regression

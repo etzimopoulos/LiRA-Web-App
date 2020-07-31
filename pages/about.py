@@ -1,12 +1,13 @@
 """Home page shown when the user enters the application"""
 import streamlit as st
 
-import awesome_streamlit as ast
+#import awesome_streamlit as ast
 
 
 # pylint: disable=line-too-long
 def write():
     """Used to write the page in the app.py file"""
+    st.image(image='angelo_pixel1.png',caption='by Angelo')
     with st.spinner("Loading About ..."):
         st.markdown(
             """
