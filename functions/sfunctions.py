@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import stats
+import time
 
 
 # ****************************************************************************************************
@@ -90,6 +91,64 @@ def NE_method(X1, y1):
     
     print("b (bias/Y intercept) =",b,", and m (slope) =",a)
     return a, b
+
+
+# ****************************************************************************************************
+# Gradient Descent method to calculate coeffiencts a and b
+# ****************************************************************************************************
+
+def GD_method(rl, L, epochs):
+    
+
+    X=rl['X'] 
+    y=rl['y']
+    n = float(len(X)) # Number of elements in X
+    y_pred = [0]*len(X)
+    # Setup the figure for plotting and animating Gradiend Descent
+    fig, ax = plt.subplots()
+    ax.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
+    ax.plot(X, y, 'ro', label ='Collected data')   
+    ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+    ax.set_title('Actual vs Predicted')
+    ax.set_xlabel('X')
+    ax.set_ylabel('y')
+    ax.legend()
+    the_plot = st.pyplot(plt,clear_figure=False)
+    
+    #def init():
+    #    pred_line.set_ydata([0]*len(X))
+    
+    def animate(i):  # update the y values (every 1000ms)
+        ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+        the_plot.pyplot(plt,clear_figure=False)
+        
+        
+    # *****************************
+    # Performing Gradient Descent 
+    # ****************************
+    # Initialise a and b
+    a = 0
+    b = 0
+    # Initialise progress bar
+    my_bar = st.progress(0)       
+    status_text = st.empty()
+    pb_i = round(epochs/100)
+    #init()
+    for i in range(epochs): 
+        y_pred = a * X + b  # The current predicted value of Y
+        D_a = (-2/n) * sum(X * (y - y_pred))  # Derivative wrt a
+        D_b = (-2/n) * sum(y - y_pred)  # Derivative wrt b
+        a = a - L * D_a  # Update m
+        b = b - L * D_b  # Update c
+        
+        # Animate sampled plots as algorithm converges along with progress bar
+        if((i % pb_i) == 0 and round(i/pb_i)<101):
+            animate(i)
+            my_bar.progress(round(i/pb_i))
+    status_text.text('Gradient Descent converged to the optimal values. Exiting...')    
+    print('a converged at', a, 'b converged at ',b)    
+       
+    return a, b, y_pred
 
 
 # ****************************************************************************************************
@@ -217,7 +276,8 @@ def plot_model(rl,ypred, method):
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='blue')     
     elif method == "NE":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='orange')             
-        
+    elif method == "GD":
+        plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='purple')         
     # scatter plot showing actual data
     plt.plot(rl['X'], rl['y'], 'ro', label ='Collected data')   
     plt.title('Actual vs Predicted')

@@ -124,10 +124,15 @@ def write():
             # Evaluate Model
             # create new evaluation method sf.NE_evaluation and replace - for now use ypred
             model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, a, b, n);
+        elif lira_method == "Gradient Descent":
+            L = st.slider('Select the Learning Rate', 0.0,2.0, 0.05)
+            epochs = st.slider('Select the number of iterations (Epochs)', 100, 1000,250,5)
+            a, b, ypred = sf.GD_method(rl, L, epochs)
+            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, a, b, n);
         else:
             st.write('''
                      #### Notice
-                     This method is under development at the moment. Please use "Simple Linear Regression" for now.
+                     This method is under development at the moment. Please use "OLS" type methods for now.
                      ''')
     
         
@@ -183,6 +188,8 @@ def write():
             sf.plot_model(rl,ypred, "OLS")
         elif lira_method == "OLS-Normal Equations":
             sf.plot_model(rl,ypred, "NE")
+        elif lira_method == "Gradient Descent":
+            sf.plot_model(rl,ypred, "GD")
         
         
 
