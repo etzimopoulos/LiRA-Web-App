@@ -97,31 +97,42 @@ def NE_method(X1, y1):
 # Gradient Descent method to calculate coeffiencts a and b
 # ****************************************************************************************************
 
-def GD_method(rl, L, epochs):
+def GD_method(rl, L, epochs, mode):
     
-
     X=rl['X'] 
     y=rl['y']
     n = float(len(X)) # Number of elements in X
     y_pred = [0]*len(X)
+    
+    if mode == 'Matplotlib':
+        fig, ax = plt.subplots()
+        ax.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
+        ax.plot(X, y, 'ro', label ='Collected data')   
+        ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+        ax.set_title('Actual vs Predicted')
+        ax.set_xlabel('X')
+        ax.set_ylabel('y')
+        ax.legend()
+        the_plot = st.pyplot(plt,clear_figure=False)
+    elif mode == 'Altair':
+        print('Altair')
+    elif mode == 'Plotly':
+        print('Plotly')
+        
     # Setup the figure for plotting and animating Gradiend Descent
-    fig, ax = plt.subplots()
-    ax.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
-    ax.plot(X, y, 'ro', label ='Collected data')   
-    ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
-    ax.set_title('Actual vs Predicted')
-    ax.set_xlabel('X')
-    ax.set_ylabel('y')
-    ax.legend()
-    the_plot = st.pyplot(plt,clear_figure=False)
+    
     
     #def init():
     #    pred_line.set_ydata([0]*len(X))
     
-    def animate(i):  # update the y values (every 1000ms)
-        ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
-        the_plot.pyplot(plt,clear_figure=False)
-        
+    def animate(i, mode):  # update the y values (every 1000ms)
+        if mode == 'Matplotlib':
+            ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+            the_plot.pyplot(plt,clear_figure=False)
+        #elif mode == 'Altair':
+            #print('Altair')
+        #elif mode == 'Plotly':
+            #print('Plotly')
         
     # *****************************
     # Performing Gradient Descent 
@@ -141,10 +152,11 @@ def GD_method(rl, L, epochs):
         a = a - L * D_a  # Update m
         b = b - L * D_b  # Update c
         
-        # Animate sampled plots as algorithm converges along with progress bar
-        if((i % pb_i) == 0 and round(i/pb_i)<101):
-            animate(i)
-            my_bar.progress(round(i/pb_i))
+        if mode == "Plotly" or mode == 'Altair' or mode == 'Matplotlib':        
+            # Animate sampled plots as algorithm converges along with progress bar
+            if((i % pb_i) == 0 and round(i/pb_i)<101):
+                animate(i, mode)
+                my_bar.progress(round(i/pb_i))
     status_text.text('Gradient Descent converged to the optimal values. Exiting...')    
     print('a converged at', a, 'b converged at ',b)    
        
@@ -187,7 +199,7 @@ def OLS_method(rl):
 # ****************************************************************************************************
 
 def liraweb_predict(a, b, X, method):
-    if method == "OLS" or method == "NE":
+    if method == "OLS-Simple Linear Regression" or method == "OLS-Normal Equations":
         y = a * X + b
         return y
     else:
@@ -272,11 +284,11 @@ def plot_model(rl,ypred, method):
     # Population Regression Line
     plt.plot(rl['X'],rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
     # Least squares line
-    if method == "OLS":
+    if method == "OLS-Simple Linear Regression":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='blue')     
-    elif method == "NE":
+    elif method == "OLS-Normal Equations":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='orange')             
-    elif method == "GD":
+    elif method == "Gradient Descent":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='purple')         
     # scatter plot showing actual data
     plt.plot(rl['X'], rl['y'], 'ro', label ='Collected data')   
