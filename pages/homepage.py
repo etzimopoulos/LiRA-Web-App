@@ -103,158 +103,213 @@ def write():
         method=["OLS-Simple Linear Regression", "OLS-Normal Equations", "Gradient Descent", "SKlearn"]
         #method=["OLS-Simple Linear Regression", "OLS-Normal Equations"]
         lira_method = st.selectbox('',(method))
+        if st.button('Predict'):
         
+            if lira_method == "OLS-Simple Linear Regression":
+                # Calculate coefficients
+                alpha, beta = sf.OLS_method(rl)
+                # Calculate Regression Line
+                ypred = sf.liraweb_predict(alpha, beta, rl['X'], lira_method)
+                # Evaluate Model
+                model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+                
+                st.write('''
+                ##
+                ## 5. Plot results
+                         ''')
+                st.write('''
+                         Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
+                         generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
+                         ''')
         
-        
-        
-        
-        if lira_method == "OLS-Simple Linear Regression":
-            # Calculate coefficients
-            alpha, beta = sf.OLS_method(rl)
-            # Calculate Regression Line
-            ypred = sf.liraweb_predict(alpha, beta, rl['X'], lira_method)
-            # Evaluate Model
-            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
-            st.write('''
-            ####
-            ## 5. Evaluate Model Metrics
-            At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                # Plot results
+                sf.plot_model(rl,ypred, lira_method)
+                
+                st.write('''
+                ####
+                ## 6. Evaluate Model Metrics
+                At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                    ''')
+                st.write('''
+                #### Assessment of Coefficients
+                * Residual Square Error - RSE
+                * t-Statistic
+                * p-Value
                 ''')
-            st.write('''
-            #### Assessment of Coefficients
-            * Residual Square Error - RSE
-            * t-Statistic
-            * p-Value
-            ''')
-            st.write(model_coeff)
-            st.write('''
-            ####
-            #### Model Assessment Summary
-            * Residual Sum of Squares - RSS
-            * RSE (Standard Deviation σ) - RSE
-            * Total Sum of Squares - TSS 
-            * R2 Statistic
-                    ''') 
-            # Cut out the dummy index column to see the Results
-            st.write(model_assess.iloc[:,1:9])
-            st.write('''
-            #### 
-             More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
-                    
-            ''')
-            st.write('''
-            ##
-            ## 6. Plot results
-                     ''')
-            st.write('''
-                     Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
-                     generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
-                     ''')
-    
-            # Plot results
-            sf.plot_model(rl,ypred, lira_method)
-            
-        elif lira_method == "OLS-Normal Equations":
-            # Calculate coefficients
-            a, b = sf.NE_method(X1,y1)
-            # Calculate Regression Line
-            ypred = sf.liraweb_predict(a, b, rl['X'], lira_method)
-            #y1pred = b + a* X1
-            # Evaluate Model
-            # create new evaluation method sf.NE_evaluation and replace - for now use ypred
-            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, a, b, n);
-            st.write('''
-            ####
-            ## 5. Evaluate Model Metrics
-            At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                st.write(model_coeff)
+                st.write('''
+                ####
+                #### Model Assessment Summary
+                * Residual Sum of Squares - RSS
+                * RSE (Standard Deviation σ) - RSE
+                * Total Sum of Squares - TSS 
+                * R2 Statistic
+                        ''') 
+                # Cut out the dummy index column to see the Results
+                st.write(model_assess.iloc[:,1:9])
+                st.write('''
+                #### 
+                 More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+                        
                 ''')
-            st.write('''
-            #### Assessment of Coefficients
-            * Residual Square Error - RSE
-            * t-Statistic
-            * p-Value
-            ''')
-            st.write(model_coeff)
-            st.write('''
-            ####
-            #### Model Assessment Summary
-            * Residual Sum of Squares - RSS
-            * RSE (Standard Deviation σ) - RSE
-            * Total Sum of Squares - TSS 
-            * R2 Statistic
-                    ''') 
-            # Cut out the dummy index column to see the Results
-            st.write(model_assess.iloc[:,1:9])
-            st.write('''
-            #### 
-             More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
-                    
-            ''')
-            st.write('''
-            ##
-            ## 6. Plot results
-                     ''')
-            st.write('''
-                     Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
-                     generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
-                     ''')
-    
-            # Plot results
-            sf.plot_model(rl,ypred, lira_method)
-            
-        elif lira_method == "Gradient Descent":
-            L = st.slider('Select the Learning Rate', 0.0,2.0, 0.05)
-            epochs = st.slider('Select the number of iterations (Epochs)', 100, 1000,250,5)
-            mode = st.selectbox("Select Plotting Library",('Skip Animation','Matplotlib','Plotly','Altair'))
-            if st.button('Go!'):
-                if mode == 'Plotly' or mode == 'Altair':
-                    st.text('Animation not implemented yet. Please use other methods.')
-                else:
-                    a, b, ypred = sf.GD_method(rl, L, epochs, mode)
-                    model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, a, b, n);
-                    st.write('''
-                    ####
-                    ## 5. Evaluate Model Metrics
-                    At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                
+                
+            elif lira_method == "OLS-Normal Equations":
+                # Calculate coefficients
+                alpha, beta = sf.NE_method(X1,y1)
+                # Calculate Regression Line
+                ypred = sf.liraweb_predict(alpha, beta, rl['X'], lira_method)
+                #y1pred = b + a* X1
+                # Evaluate Model
+                # create new evaluation method sf.NE_evaluation and replace - for now use ypred
+                model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+                st.write('''
+                ##
+                ## 5. Plot results
+                         ''')
+                st.write('''
+                         Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
+                         generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
+                         ''')
+        
+                # Plot results
+                sf.plot_model(rl,ypred, lira_method)
+                
+                st.write('''
+                ####
+                ## 6. Evaluate Model Metrics
+                At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                    ''')
+                st.write('''
+                #### Assessment of Coefficients
+                * Residual Square Error - RSE
+                * t-Statistic
+                * p-Value
+                ''')
+                st.write(model_coeff)
+                st.write('''
+                ####
+                #### Model Assessment Summary
+                * Residual Sum of Squares - RSS
+                * RSE (Standard Deviation σ) - RSE
+                * Total Sum of Squares - TSS 
+                * R2 Statistic
+                        ''') 
+                # Cut out the dummy index column to see the Results
+                st.write(model_assess.iloc[:,1:9])
+                st.write('''
+                #### 
+                 More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+                        
+                ''')
+                
+            elif lira_method == "Gradient Descent":
+                L = st.slider('Select the Learning Rate', 0.0,2.0, 0.05)
+                epochs = st.slider('Select the number of iterations (Epochs)', 100, 1000,250,5)
+                mode = st.selectbox("Select Plotting Library",('Skip Animation','Matplotlib','Plotly','Altair'))
+                if st.button('Go!'):
+                    if mode == 'Plotly' or mode == 'Altair':
+                        st.text('Animation not implemented yet. Please use other methods.')
+                    else:
+                        alpha, beta, ypred = sf.GD_method(rl, L, epochs, mode)
+                        model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+                        st.write('''
+                        ##
+                        ## 5. Plot results
+                                 ''')
+                        st.write('''
+                                 Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
+                                 generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
+                                 ''')
+                
+                        # Plot results
+                        sf.plot_model(rl,ypred, lira_method)
+                        
+                        st.write('''
+                        ####
+                        ## 6. Evaluate Model Metrics
+                        At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+                            ''')
+                        st.write('''
+                        #### Assessment of Coefficients
+                        * Residual Square Error - RSE
+                        * t-Statistic
+                        * p-Value
                         ''')
-                    st.write('''
-                    #### Assessment of Coefficients
-                    * Residual Square Error - RSE
-                    * t-Statistic
-                    * p-Value
+                        st.write(model_coeff)
+                        st.write('''
+                        ####
+                        #### Model Assessment Summary
+                        * Residual Sum of Squares - RSS
+                        * RSE (Standard Deviation σ) - RSE
+                        * Total Sum of Squares - TSS 
+                        * R2 Statistic
+                                ''') 
+                        # Cut out the dummy index column to see the Results
+                        st.write(model_assess.iloc[:,1:9])
+                        st.write('''
+                        #### 
+                         More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+                                
+                        ''')
+                        
+            elif lira_method == 'SKlearn':
+                from sklearn.linear_model import LinearRegression
+                lr = LinearRegression()
+                lr.fit(rl['X'].values.reshape(-1, 1), rl['y'].values.reshape(-1, 1))
+                alpha = lr.coef_[0][0]
+                beta = lr.intercept_[0]
+                ypred = sf.liraweb_predict(alpha, beta, rl['X'], lira_method)
+                
+                # Evaluate Model
+                # create new evaluation method sf.NE_evaluation and replace - for now use ypred
+                model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+                st.write('''
+                ##
+                ## 5. Plot results
+                         ''')
+                st.write('''
+                         Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
+                         generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
+                         ''')
+        
+                # Plot results
+                sf.plot_model(rl,ypred, lira_method)
+                
+                st.write('''
+                ####
+                ## 6. Evaluate Model Metrics
+                At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
                     ''')
-                    st.write(model_coeff)
-                    st.write('''
-                    ####
-                    #### Model Assessment Summary
-                    * Residual Sum of Squares - RSS
-                    * RSE (Standard Deviation σ) - RSE
-                    * Total Sum of Squares - TSS 
-                    * R2 Statistic
-                            ''') 
-                    # Cut out the dummy index column to see the Results
-                    st.write(model_assess.iloc[:,1:9])
-                    st.write('''
-                    #### 
-                     More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
-                            
-                    ''')
-                    st.write('''
-                    ##
-                    ## 6. Plot results
-                             ''')
-                    st.write('''
-                             Plotting the Predicted Least Squares linear function at the same diagram with the Actual line used to
-                             generate the data, as well as the Sampled Data, gives a good visual overview of the prediction capability of the model.
-                             ''')
-            
-                    # Plot results
-                    sf.plot_model(rl,ypred, lira_method)
-        else:
-            st.write('''
-                     #### Notice
-                     This method is under development at the moment. Please use any of the methods.
-                     ''')
+                st.write('''
+                #### Assessment of Coefficients
+                * Residual Square Error - RSE
+                * t-Statistic
+                * p-Value
+                ''')
+                st.write(model_coeff)
+                st.write('''
+                ####
+                #### Model Assessment Summary
+                * Residual Sum of Squares - RSS
+                * RSE (Standard Deviation σ) - RSE
+                * Total Sum of Squares - TSS 
+                * R2 Statistic
+                        ''') 
+                # Cut out the dummy index column to see the Results
+                st.write(model_assess.iloc[:,1:9])
+                st.write('''
+                #### 
+                 More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+                        
+                ''')
+                
+                
+            #else:
+            #    st.write('''
+            #             #### Notice
+            #             This method is under development at the moment. Please use any of the methods.
+            #             ''')
     
         
         

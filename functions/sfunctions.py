@@ -74,6 +74,7 @@ def generate_data(n, a, b, mean_x, stddev_x, mean_res):
         )
         return rl, X1, y1
 
+
 # ****************************************************************************************************
 # Normal Equations method to calculate coeffiencts a and b
 # ****************************************************************************************************
@@ -199,7 +200,7 @@ def OLS_method(rl):
 # ****************************************************************************************************
 
 def liraweb_predict(a, b, X, method):
-    if method == "OLS-Simple Linear Regression" or method == "OLS-Normal Equations":
+    if method == "OLS-Simple Linear Regression" or method == "OLS-Normal Equations" or method == "SKlearn":
         y = a * X + b
         return y
     else:
@@ -290,6 +291,8 @@ def plot_model(rl,ypred, method):
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='orange')             
     elif method == "Gradient Descent":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='purple')         
+    elif method == "SKlearn":
+        plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='k')
     # scatter plot showing actual data
     plt.plot(rl['X'], rl['y'], 'ro', label ='Collected data')   
     plt.title('Actual vs Predicted')
