@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import stats
-import time
+#import time
+import altair as alt
 
 
 # ****************************************************************************************************
@@ -54,19 +55,25 @@ def generate_data(n, a, b, mean_x, stddev_x, mean_res):
 
         # Create Independent Variable as simulated Input vector X by specifying Mean, Standard Deviation and number of samples 
         X = create_distribution(mean_x, stddev_x,r)
-        # Transform "X" to use as matrix in Normal Equations
-        X1 = np.matrix([np.ones(n), X]).T
+        
 
         # Create Random Error as simulated Residual Error term err using mean = 0 and Standard Deviation from Slider
         err = create_distribution(mean_res,0, r1)
-        
-        
+                
         # Create Dependent Variable simulated Output vector y by specifying Slope, Intercept, Input vector X and Simulated Residual Error
         y, y_act = create_variable(a, b, X, err)
+        
+        # ************ Normal Equations data trasnformations ****
+        # Transform "X" to use as matrix in Normal Equations
+        X1 = np.matrix([np.ones(n), X]).T
         # Transform "y" to use as matrix in Normal Equations
         y1 = np.matrix(y).T
         
-            # Storing Population Actual Regression Line "y_act", data points X and y in a data frame
+        # ************ Gradient descent
+        
+        
+        
+        # Storing Population Actual Regression Line "y_act", data points X and y in a data frame
         rl = pd.DataFrame(
             {"X": X,
              'y': y,
@@ -80,89 +87,135 @@ def generate_data(n, a, b, mean_x, stddev_x, mean_res):
 # ****************************************************************************************************
 
 def NE_method(X1, y1):
-    # ## Calculate coefficients alpha and beta
-    
-    # Assuming y = aX + b
-    # a ~ alpha
-    # b ~ beta
+    # Calculate coefficients alpha (or a) and beta (or b)
     A = np.linalg.inv(X1.T.dot(X1)).dot(X1.T).dot(y1)
-    
     a = A[1].item()
     b = A[0].item()
-    
-    print("b (bias/Y intercept) =",b,", and m (slope) =",a)
     return a, b
 
+
+
+# *****************************************************************************************
+# Gradiend Descent Error function    
+# *****************************************************************************************
+
+def GD_error(a, b, X, y):
+    y_pred = a * X + b  # The current predicted value of Y
+    cost = sum((y_pred-y)**2) / (2*len(y)) 
+    return cost
+         
+
+# *****************************************************************************************
+# Gradiend Descent Weights Calculation function    
+# *****************************************************************************************
+   
+def GD_theta(a, b, X, y, L, n):  
+    y_pred = a * X + b  # The current predicted value of Y
+    # Theta or Weights calculation
+    D_a = (-2/n) * sum(X * (y - y_pred))  # Derivative wrt a
+    D_b = (-2/n) * sum(y - y_pred)  # Derivative wrt b
+    a = a - L * D_a  # Update alpha
+    b = b - L * D_b  # Update beta
+    return a, b, y_pred
+
+
+# *****************************************************************************************
+# Animation function to show how Gradient Descent predicted line converges to Actual Line    
+# *****************************************************************************************
+
+def GD_animate(rl,draw_fig1, data_points, regression_line):
+    
+   #if mode == "Altair":
+    
+       
+    predicted_line = alt.Chart(rl).mark_line(color='purple').encode(x='X', y='y_pred')
+    #draw_fig1.altair_chart(predicted_line)
+    draw_fig1.altair_chart(data_points+regression_line+predicted_line)
+    
+    #err_df = pd.DataFrame(tmp_err)
+    #error_line = alt.Chart(err_df).mark_line(color='red').encode(x='epochs', y='err')
+    #draw_fig2 = st.altair_chart(error_line)
+    #draw_fig2.altair_chart(error_line)
+    
+    # elif mode == "Matplotlib":
+    #     ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+    #     the_plot.pyplot(plt,clear_figure=False)
+        
 
 # ****************************************************************************************************
 # Gradient Descent method to calculate coeffiencts a and b
 # ****************************************************************************************************
-
-def GD_method(rl, L, epochs, mode):
+def GD_method(rl, L, epochs):
     
     X=rl['X'] 
     y=rl['y']
     n = float(len(X)) # Number of elements in X
-    y_pred = [0]*len(X)
+    y_pred = [0]*len(X) # Used in animation with Matplotlib
+    rl['y_pred'] = [0]*len(X) # Used in animation with Altair
     
-    if mode == 'Matplotlib':
-        fig, ax = plt.subplots()
-        ax.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
-        ax.plot(X, y, 'ro', label ='Collected data')   
-        ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
-        ax.set_title('Actual vs Predicted')
-        ax.set_xlabel('X')
-        ax.set_ylabel('y')
-        ax.legend()
-        the_plot = st.pyplot(plt,clear_figure=False)
-    elif mode == 'Altair':
-        print('Altair')
-    elif mode == 'Plotly':
-        print('Plotly')
+    
+    # Plot using Altair for Animation 
+    # if mode == "Matplotlib":
+    # Define lines
+    data_points = alt.Chart(rl).mark_point(color='red').encode(x='X', y='y')
+    regression_line = alt.Chart(rl).mark_line(color='green').encode(x='X', y='y_act')
+    #error_line = alt.Chart(error).mark_line(color='blue').encode(x='epochs', y='err')
+             
+    # Draw plots
+    draw_fig1 = st.altair_chart(data_points+regression_line)
+    #draw_fig2 = st.altair_chart(error_line)
+    
+    
+    # elif mode == "Matplotlib":
+    #     fig, ax = plt.subplots()
+    #     ax.plot(X,rl['y_act'], label = 'Actual (Population Regression Line)',color='green')
+    #     ax.plot(X, y, 'ro', label ='Collected data')   
+    #     ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
+    #     ax.set_title('Actual vs Predicted')
+    #     ax.set_xlabel('X')
+    #     ax.set_ylabel('y')
+    #     ax.legend()
+    #     the_plot = st.pyplot(plt,clear_figure=False)
+    
         
-    # Setup the figure for plotting and animating Gradiend Descent
     
-    
-    #def init():
-    #    pred_line.set_ydata([0]*len(X))
-    
-    def animate(i, mode):  # update the y values (every 1000ms)
-        if mode == 'Matplotlib':
-            ax.plot(X, y_pred, label = 'Predicted (Least Squares Line)', color='purple')
-            the_plot.pyplot(plt,clear_figure=False)
-        #elif mode == 'Altair':
-            #print('Altair')
-        #elif mode == 'Plotly':
-            #print('Plotly')
-        
-    # *****************************
+    # ************************************************************
     # Performing Gradient Descent 
-    # ****************************
-    # Initialise a and b
-    a = 0
-    b = 0
+    # ************************************************************
+    # Initialise a and b and error
+    a=0
+    b=0
+    tmp_err = []
+    tmp_theta = []
+    
+    
     # Initialise progress bar
     my_bar = st.progress(0)       
     status_text = st.empty()
     pb_i = round(epochs/100)
-    #init()
+    
     for i in range(epochs): 
-        y_pred = a * X + b  # The current predicted value of Y
-        D_a = (-2/n) * sum(X * (y - y_pred))  # Derivative wrt a
-        D_b = (-2/n) * sum(y - y_pred)  # Derivative wrt b
-        a = a - L * D_a  # Update m
-        b = b - L * D_b  # Update c
-        
-        if mode == "Plotly" or mode == 'Altair' or mode == 'Matplotlib':        
-            # Animate sampled plots as algorithm converges along with progress bar
-            if((i % pb_i) == 0 and round(i/pb_i)<101):
-                animate(i, mode)
-                my_bar.progress(round(i/pb_i))
-    status_text.text('Gradient Descent converged to the optimal values. Exiting...')    
-    print('a converged at', a, 'b converged at ',b)    
+        a, b, y_pred = GD_theta(a, b, X, y, L, n)
+        err = GD_error(a, b, X, y)
        
-    return a, b, y_pred
-
+        # Store cumulative error and weights
+        tmp_err.append([i, err]) 
+        tmp_theta.append([i, a, b])
+        
+        
+        rl['y_pred'] = a * X + b # To use for animation with Altair
+        #error['err'] = err # To use for animation with Altair
+        #rl['epochs'] = epochs
+        
+        # ***********************************************
+        # ANIMATE Gradient Descent
+        # ***********************************************
+        # Animate sampled plots as algorithm converges along with progress bar
+        if((i % pb_i) == 0 and round(i/pb_i)<101):
+            GD_animate(rl,draw_fig1, data_points, regression_line)
+            my_bar.progress(round(i/pb_i))
+    status_text.text('Gradient Descent converged to the optimal values. Exiting...')    
+    return a, b, y_pred, tmp_err
 
 # ****************************************************************************************************
 # Ordinary Least Squares method to calculate coeffiencts a and b
@@ -190,9 +243,6 @@ def OLS_method(rl):
     
     # Calculate beta
     beta = ymean - (alpha * xmean)
-    print('alpha =', alpha)
-    print('beta =',beta)
-    
     return alpha, beta
 
 # ****************************************************************************************************
@@ -216,15 +266,28 @@ def OLS_evaluation(rl, ypred, alpha, beta, n):
     ymean = np.mean(rl['y'])
     xmean = np.mean(rl['X'])
     
+    
+    print('\n****************************************************')
+    print('Estimated Model')
+    print('****************************************************')
+    print('\nAlpha (Slope) calculated as ', alpha)
+    print('\nBeta (Intercept) calculated as ',beta)
+    print('\nLeast Squares line predicted as y = %.2fX + %.2f' % (alpha, beta))
+    
+    
+    print('\n****************************************************')
+    print('Model performance metrics')
+    print('****************************************************')
     # Residual Errors
     RE = (rl['y'] - ypred)**2
+    
     #Residual Sum Squares
     RSS = RE.sum()
-    print("Residual Sum of Squares (RSS) is:",RSS)
+    print("\nResidual Sum of Squares (RSS) is:",RSS)
     
     # Estimated Standard Variation (sigma) or RSE
     RSE = np.sqrt(RSS/(n-2))
-    print("\nResidual Standar Error (Standard Deviation σ) is:",RSE)
+    print("\nResidual Standard Error (Standard Deviation σ) is:",RSE)
     
     # Total Sum of squares (TSS)
     TE = (rl['y'] - ymean)**2
@@ -234,7 +297,7 @@ def OLS_evaluation(rl, ypred, alpha, beta, n):
     
     # R^2 Statistic
     R2 = 1 - RSS/TSS
-    print("\n R2 Statistic is:",R2)
+    print("\nR2 Statistic is:",R2)
     
     
     # ## Assessing Coefficients accuracy
@@ -279,6 +342,16 @@ def OLS_evaluation(rl, ypred, alpha, beta, n):
     ma_df.iloc[:,1:9]
     return mcf_df, ma_df
 
+def plot_GD_error(error):
+    plt.figure(figsize=(12, 6))
+    # Population Regression Line
+    plt.plot(error[1], label='Gradient Descent Method - Error tracking', color='orange')
+    plt.title('Error')
+    plt.xlabel('Epochs')
+    plt.ylabel('error')
+    plt.legend()
+    st.pyplot()
+
 def plot_model(rl,ypred, method):
     # Plot regression against actual data
     plt.figure(figsize=(12, 6))
@@ -290,7 +363,8 @@ def plot_model(rl,ypred, method):
     elif method == "OLS-Normal Equations":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='orange')             
     elif method == "Gradient Descent":
-        plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='purple')         
+        plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='purple')             
+   
     elif method == "SKlearn":
         plt.plot(rl['X'], ypred, label = 'Predicted (Least Squares Line)', color='k')
     # scatter plot showing actual data
@@ -301,3 +375,97 @@ def plot_model(rl,ypred, method):
     plt.legend()
     #plt.show()
     st.pyplot()
+    
+def plots_and_metrics(rl, ypred, lira_method,model_coeff, model_assess):
+    st.write('''
+    ##
+    ## 5. Plot results
+             ''')
+    st.write('''
+             The plot gives a good visual overview of the prediction capability of the model, capturing the following elements:
+              1) The Predicted Least Squares linear function
+              2) The Actual line used to generate the data
+              3) The Sampled Data
+    ''')
+
+    # Plot results
+    plot_model(rl,ypred, lira_method)
+    
+    st.write('''
+    ####
+    ## 6. Evaluate Model Metrics
+    At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+        ''')
+    st.write('''
+    #### Assessment of Coefficients
+    * Residual Square Error - RSE
+    * t-Statistic
+    * p-Value
+    ''')
+    st.write(model_coeff)
+    st.write('''
+    ####
+    #### Model Assessment Summary
+    * Residual Sum of Squares - RSS
+    * RSE (Standard Deviation σ) - RSE
+    * Total Sum of Squares - TSS 
+    * R2 Statistic
+            ''') 
+    # Cut out the dummy index column to see the Results
+    st.write(model_assess.iloc[:,1:9])
+    st.write('''
+    #### 
+     More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+            
+    ''')
+    
+def GD_plots_and_metrics(rl, ypred, error, lira_method, model_coeff, model_assess):
+    st.write('''
+    ##
+    ## 5. Plot results
+              ''')
+    st.write('''
+              The plot gives a good visual overview of the prediction capability of the model, capturing the following elements:
+              1) The Predicted Least Squares linear function
+              2) The Actual line used to generate the data
+              3) The Sampled Data
+              
+              ''')
+
+    # Plot results
+    plot_model(rl, ypred, lira_method)
+    
+    st.write('''
+              The graph below shows the error curve as the model learns to approximate the Predicted line better.
+              ''')
+
+    
+    plot_GD_error(error)
+    
+    st.write('''
+    ####
+    ## 6. Evaluate Model Metrics
+    At this section, the predicted model and its coeeficients will be evaluated using various Statical Measures.
+        ''')
+    st.write('''
+    #### Assessment of Coefficients
+    * Residual Square Error - RSE
+    * t-Statistic
+    * p-Value
+    ''')
+    st.write(model_coeff)
+    st.write('''
+    ####
+    #### Model Assessment Summary
+    * Residual Sum of Squares - RSS
+    * RSE (Standard Deviation σ) - RSE
+    * Total Sum of Squares - TSS 
+    * R2 Statistic
+            ''') 
+    # Cut out the dummy index column to see the Results
+    st.write(model_assess.iloc[:,1:9])
+    st.write('''
+    #### 
+      More reading on evaluating the linear regression model can be found [here](https://www.ritchieng.com/machine-learning-evaluate-linear-regression-model/).
+            
+    ''')
