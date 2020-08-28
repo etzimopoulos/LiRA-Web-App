@@ -65,10 +65,7 @@ def write():
         st.sidebar.subheader('Residual Error')
         #st.write('Select residual distribution for noise added to Simulated Linear function')
         mean_res = st.sidebar.slider ('Select Mean for Residual Error',0.0,2.0,0.7)
-           
-        
-        
-        
+                        
         # Dataframe to store generated data
         rl, X1, y1 = sf.generate_data(n, a, b, mean_x, stddev_x, mean_res)
         
@@ -97,9 +94,29 @@ def write():
         #### Select Linear Regression method
                  ''')
            
-        method=["OLS-Simple Linear Regression", "OLS-Normal Equations", "Gradient Descent", "SKlearn"]
+        method=["Gradient Descent", "OLS-Simple Linear Regression", "OLS-Normal Equations", "SKlearn"]
         lira_method = st.selectbox('',(method))
         #if st.button('Predict'):
+        
+        if lira_method == "Gradient Descent":
+            # Configuration Parameters for Gradient Descent
+            L = st.slider('Select the Learning Rate', 0.0,0.05, 0.015,0.0001)
+            epochs = st.slider('Select the number of iterations (Epochs)', 100, 1000,250,5)
+            #pmethod = ['Altair','Plotly','Matplotlib', 'Skip Animation']
+            #mode = st.selectbox("Select Plotting Library",(pmethod))
+            
+            # Calculate model and coefficients
+            alpha, beta, ypred, tmp_err= sf.GD_method(rl, L, epochs)
+            error = pd.DataFrame(tmp_err)
+                        
+            # Evaluate Model
+            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
+            
+            # Results summary
+            # Plot final graphs and Evaluate Model metrics
+            sf.GD_plots_and_metrics(rl, ypred, error, lira_method,model_coeff, model_assess)
+            
+            
         
         if lira_method == "OLS-Simple Linear Regression":
             # Calculate coefficients
@@ -131,6 +148,7 @@ def write():
             # Plot final graphs and Evaluate Model metrics
             sf.plots_and_metrics(rl, ypred, lira_method,model_coeff, model_assess)
             
+        
         if lira_method == 'SKlearn':
             # Import library
             from sklearn.linear_model import LinearRegression
@@ -148,26 +166,6 @@ def write():
             # Results summary
             # Plot final graphs and Evaluate Model metrics
             sf.plots_and_metrics(rl, ypred, lira_method,model_coeff, model_assess)
-           
-      
-        if lira_method == "Gradient Descent":
-            # Configuration Parameters for Gradient Descent
-            L = st.slider('Select the Learning Rate', 0.0,0.05, 0.015,0.0001)
-            epochs = st.slider('Select the number of iterations (Epochs)', 100, 1000,250,5)
-            #pmethod = ['Altair','Plotly','Matplotlib', 'Skip Animation']
-            #mode = st.selectbox("Select Plotting Library",(pmethod))
-            
-            # Calculate model and coefficients
-            alpha, beta, ypred, tmp_err= sf.GD_method(rl, L, epochs)
-            error = pd.DataFrame(tmp_err)
-                        
-            # Evaluate Model
-            model_coeff, model_assess = sf.OLS_evaluation(rl, ypred, alpha, beta, n);
-            
-            # Results summary
-            # Plot final graphs and Evaluate Model metrics
-            sf.GD_plots_and_metrics(rl, ypred, error, lira_method,model_coeff, model_assess)
-            
             
 
 if __name__ == "__main__":

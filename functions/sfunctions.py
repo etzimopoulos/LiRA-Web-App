@@ -1,4 +1,4 @@
-"""About the Author"""
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -300,7 +300,7 @@ def OLS_evaluation(rl, ypred, alpha, beta, n):
     print("\nR2 Statistic is:",R2)
     
     
-    # ## Assessing Coefficients accuracy
+    # Assessing Coefficients accuracy
        
     # Degrees of freedom
     df = 2*n - 2
